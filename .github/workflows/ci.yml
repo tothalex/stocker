@@ -28,6 +28,9 @@ jobs:
     - name: Generate prisma types
       run: pnpm run prisma:generate
 
+    - name: Check prisma format
+      run: pnpm run prisma:format
+
     - name: Lint with ESLint
       run: pnpm run lint
 
