@@ -17,6 +17,7 @@ The Advanced Stock Price Checker is a backend service developed using Nest.js. I
   git clone https://github.com/tothalex/stocker.git
   cd stocker
   pnpm install
+  pnpm run prisma:generate
 ```
 
 ### Setup Environment
