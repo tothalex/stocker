@@ -14,6 +14,11 @@ export class PrismaService
   async onModuleDestroy() {
     await this.$disconnect()
   }
+
+  async cleanDb() {
+    await this.stockPrice.deleteMany()
+    await this.stock.deleteMany()
+  }
 }
 
 @Module({

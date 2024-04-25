@@ -17,9 +17,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e:local": "docker-compose -f docker-compose.yaml up -d && pnpm run prisma:apply && jest --config ./test/jest-e2e.json",
     "prisma:generate": "npx prisma generate",
-    "prisma:format": "npx prisma format"
+    "prisma:format": "npx prisma format",
+    "prisma:apply": "npx prisma migrate deploy"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -27,11 +28,13 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^4.0.2",
+    "@nestjs/swagger": "^7.3.1",
     "@prisma/client": "^5.12.1",
     "axios": "^1.6.8",
     "decimal.js": "^10.4.3",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

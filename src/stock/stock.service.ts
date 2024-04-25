@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { AxiosResponse } from 'axios'
 
 import { PrismaService } from '../prisma'
 import { HttpService } from '@nestjs/axios'
-import { QuoteReponse } from './types'
+import { MarketStatusResponse, QuoteReponse } from './types'
 import { Prisma } from '@prisma/client'
 
 @Injectable()
@@ -17,25 +16,31 @@ export class StockService {
     private readonly httpService: HttpService,
   ) {}
 
-  async getMetric(symbol: string): Promise<AxiosResponse> {
-    return this.httpService.axiosRef.get(`${this.API_URL}/stock/metric`, {
+  public async getQuote(symbol: string): Promise<QuoteReponse> {
+    return this.httpService.axiosRef.get(`${this.API_URL}/quote`, {
       params: {
         symbol,
         token: this.API_TOKEN,
-        metric: 'all',
       },
     })
   }
 
   async subscribe(symbol: string) {
-    await this.prisma.stock.upsert({
-      where: {
+    return this.prisma.stock.create({
+      data: {
         symbol,
       },
-      create: {
+    })
+  }
+
+  async insertStockPrice(params: { symbol: string; price: string }) {
+    const { symbol, price } = params
+
+    return this.prisma.stockPrice.create({
+      data: {
         symbol,
+        price,
       },
-      update: {},
     })
   }
 
@@ -57,8 +62,16 @@ export class StockService {
     })
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: 'market-price-poll',
+  })
   async handleCron() {
+    const { data } = await this.getMarketStatus()
+
+    if (!data.isOpen) {
+      return
+    }
+
     const stocks = await this.prisma.stock.findMany()
     stocks.forEach(async (stock) => {
       try {
@@ -75,12 +88,15 @@ export class StockService {
     })
   }
 
-  private async getQuote(symbol: string): Promise<QuoteReponse> {
-    return this.httpService.axiosRef.get(`${this.API_URL}/quote`, {
-      params: {
-        symbol,
-        token: this.API_TOKEN,
+  private async getMarketStatus(): Promise<MarketStatusResponse> {
+    return this.httpService.axiosRef.get(
+      `${this.API_URL}/stock/market-status`,
+      {
+        params: {
+          exchange: 'US',
+          token: this.API_TOKEN,
+        },
       },
-    })
+    )
   }
 }

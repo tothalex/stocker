@@ -18,3 +18,13 @@ export type QuoteReponse = {
     t: number
   }
 }
+
+export type MarketStatusResponse = {
+  data: {
+    exchange: string
+    isOpen: boolean
+    session: string
+    t: number
+    timezone: string
+  }
+}
